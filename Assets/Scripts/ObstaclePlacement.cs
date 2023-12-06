@@ -24,20 +24,6 @@ public class ObstaclePlacement : MonoBehaviour
         
     }
 
-    void MoveObstacle()
-    {
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out RaycastHit raycastHit)
-            && raycastHit.collider.tag.Equals("Obstacle"))
-        {
-            var point = raycastHit.point;
-            var obj = raycastHit.collider.gameObject;
-            point.y -= obj.transform.position.y / 2;
-            obj.transform.position = point;
-        }
-    }
-
     void AddObstacle()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -55,6 +41,7 @@ public class ObstaclePlacement : MonoBehaviour
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         
+        Debug.Log("test");
         if (Physics.Raycast(ray, out RaycastHit raycastHit)
             && raycastHit.collider.tag.Equals("Obstacle"))
         {
