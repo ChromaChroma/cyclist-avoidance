@@ -14,7 +14,6 @@ public class cyclingBehaviour : MonoBehaviour
     public float accelerationFactor = 38f;
     public float turnFactor = 3.5f;
 
-    // public int Spawnbike = 0;
     public bool Spawn = false;
     public Button yourButton;
 
@@ -27,7 +26,7 @@ public class cyclingBehaviour : MonoBehaviour
     }
 
     void TaskOnClick(){
-		Debug.Log ("You have clicked the button!");
+		// Debug.Log ("You have clicked the button!");
         Spawn = true;
 	}
 
@@ -39,7 +38,6 @@ public class cyclingBehaviour : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Spawnbike = !Spawnbike;
         if(Spawn){
             ApplyDriveForce();
             if(Vector2.Distance(myRigidBody.position, circle.position) <= 5)
