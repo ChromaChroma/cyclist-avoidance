@@ -25,9 +25,11 @@ public class PlayPauseScript : MonoBehaviour
             PausedButton();
         }
     }
+    
 
     private void PlayPause()
     {
+        Debug.Log("test");
         if (_active)
         {
             Time.timeScale = 0;
