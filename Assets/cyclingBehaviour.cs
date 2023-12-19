@@ -21,6 +21,7 @@ public class cyclingBehaviour : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // myRigidBody.SetActive(false);
         Button btn = yourButton.GetComponent<Button>();
 		btn.onClick.AddListener(TaskOnClick);
     }
@@ -39,6 +40,7 @@ public class cyclingBehaviour : MonoBehaviour
     void FixedUpdate()
     {
         if(Spawn){
+            // myRigidBody.SetActive(true);
             ApplyDriveForce();
             if(Vector2.Distance(myRigidBody.position, circle.position) <= 5)
             {
