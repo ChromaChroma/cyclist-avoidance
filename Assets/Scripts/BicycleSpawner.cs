@@ -25,8 +25,11 @@ public class BicycleSpawner : MonoBehaviour
             var spawnedCyclist = Instantiate(spawnObject);
             spawnedCyclist.transform.position = transform.position;
             
+            var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
+            cyclistAi.goal = GameObject.Find("Goal").transform;
+
             // Add cyclist to collective list of agents (for collision checks and nearest neighbours)
-            
+
         }
     }
 }
