@@ -1,17 +1,14 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
-using Object = UnityEngine.Object;
 
 public class SpawnOnClick3D : MonoBehaviour
 {
-    [SerializeField] private GameObject _gameObject;
+    [SerializeField] public GameObject _gameObject;
     [SerializeField] private ToolMode _requiredToolMode = ToolMode.Spawner;
-
+    [SerializeField] [CanBeNull] public Action _onSpawnClick;
+    
     private void Update()
     {
         if (EventSystem.current.IsPointerOverGameObject() || ActiveMode.Mode != _requiredToolMode)
@@ -36,12 +33,18 @@ public class SpawnOnClick3D : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit)) // Check hit on backdrop only
         {
-            var p = hit.point;
-            p.y += _gameObject.GetComponent<MeshRenderer>().bounds.size.y / 2; // Set height to be flush on the ground
-
-            var spawner = Instantiate(_gameObject); 
-            spawner.GetComponent<BicycleSpawner>().goalObject = GameObject.Find("Goal");
-            spawner.transform.position = p;
+            var gameObject = Instantiate(_gameObject);
+            gameObject.transform.position = hit.point;
+            
+            // Manual Hack for if gameobject is spawner
+            var comp = gameObject.GetComponent<BicycleSpawner>();
+            if (comp is not null)
+            {
+                comp.goalObject = GameObject.Find("Goal");
+            }
+            
+            // Lastly, run action
+            _onSpawnClick?.Invoke();
         }
     }
 
