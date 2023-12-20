@@ -11,6 +11,9 @@ public class BicycleSpawner : MonoBehaviour
 
     [SerializeField] [Tooltip("GameObject (Cyclist) to spawn")]
     public GameObject spawnObject;
+    
+    [SerializeField] [Tooltip("GameObject (Goal) to navigate the bicycles to")]
+    public GameObject goalObject;
 
     private float _time;
 
@@ -26,7 +29,7 @@ public class BicycleSpawner : MonoBehaviour
             spawnedCyclist.transform.position = transform.position;
             
             var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
-            cyclistAi.goal = GameObject.Find("Goal").transform;
+            cyclistAi.goal = goalObject.transform;
 
             // Add cyclist to collective list of agents (for collision checks and nearest neighbours)
 
