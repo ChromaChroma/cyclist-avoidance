@@ -31,7 +31,6 @@ public class ToolDropdownScript : MonoBehaviour
 
         foreach (ToolMode toolMode in Enum.GetValues(typeof(ToolMode)))
         {
-            Debug.Log(toolMode.ToString());
             var option = new TMP_Dropdown.OptionData(toolMode.ToString());
             _dropdown.options.Add(option);
         }
