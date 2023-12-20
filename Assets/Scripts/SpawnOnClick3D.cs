@@ -39,7 +39,8 @@ public class SpawnOnClick3D : MonoBehaviour
             var p = hit.point;
             p.y += _gameObject.GetComponent<MeshRenderer>().bounds.size.y / 2; // Set height to be flush on the ground
 
-            var spawner = Instantiate(_gameObject);
+            var spawner = Instantiate(_gameObject); 
+            spawner.GetComponent<BicycleSpawner>().goalObject = GameObject.Find("Goal");
             spawner.transform.position = p;
         }
     }
