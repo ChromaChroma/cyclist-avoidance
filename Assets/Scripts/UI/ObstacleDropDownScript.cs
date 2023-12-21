@@ -23,7 +23,9 @@ public class ObstacleDropDownScript : MonoBehaviour
         
         _dropdown.onValueChanged.AddListener(UpdateObstacle);
         
-        _obstacles = (GameObject[]) Resources.LoadAll("Obstacles", typeof(GameObject));
+        _obstacles = Resources.LoadAll("Obstacles", typeof(GameObject))
+            .Select(o => (GameObject)o)
+            .ToArray();
         
         LoadOptions();
     }

@@ -27,7 +27,6 @@ public class BicycleSpawner : MonoBehaviour
             // Spawn Cyclist
             var spawnedCyclist = Instantiate(spawnObject);
             spawnedCyclist.transform.position = transform.position;
-            Debug.Log($"Spawner: {transform.position}, Bicycle: {spawnedCyclist.transform.position}");
             
             var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
             cyclistAi.goal = goalObject.transform;

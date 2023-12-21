@@ -27,7 +27,6 @@ public class cyclingBehaviour : MonoBehaviour
     }
 
     void TaskOnClick(){
-		// Debug.Log ("You have clicked the button!");
         Spawn = true;
 	}
 

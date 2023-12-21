@@ -18,7 +18,7 @@ public class SliderWithLabel : MonoBehaviour
     [SerializeField] private float _default;
     
     // Event fields for slider in inspector
-    [SerializeField] private UnityEvent<SliderWithLabel> _initialize = new();
+    [SerializeField] private UnityEvent _initialize = new();
     [SerializeField] private Slider.SliderEvent _onValueChanged = new();
     
     // Child components in the SliderWithLabel
@@ -38,8 +38,8 @@ public class SliderWithLabel : MonoBehaviour
         _slider.value = _default;
 
         UpdateSliderLabel(_slider.value);
-
-        _initialize.Invoke(this);
+        
+        _initialize.Invoke();
     }
 
     private void UpdateSliderLabel(float currentSpeed) => _labelText.text = $"{_baseText} ({currentSpeed:F1}):";

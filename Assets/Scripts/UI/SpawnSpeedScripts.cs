@@ -1,20 +1,24 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SpawnSpeedScript : MonoBehaviour
 {
-   public void Init(SliderWithLabel comp)
-   {
-      foreach (var spawner in GameObject.FindGameObjectsWithTag("Spawner"))
-      {
-          spawner.GetComponent<BicycleSpawner>().spawningSpeed = comp.CurrentValue();
-      }
-   }
+    [SerializeField] private Slider _slider;
 
-   public void UpdateSpawnSpeed(float speed)
-   {
-       foreach (var spawner in GameObject.FindGameObjectsWithTag("Spawner"))
-       {
-           spawner.GetComponent<BicycleSpawner>().spawningSpeed = speed;
-       }
-   }
+    public void Initialize()
+    {
+        var currentValue = _slider.value;
+        foreach (var spawner in GameObject.FindGameObjectsWithTag("Spawner"))
+        {
+            spawner.GetComponent<BicycleSpawner>().spawningSpeed = currentValue;
+        }
+    }
+
+    public void UpdateSpawnSpeed()
+    {
+        foreach (var spawner in GameObject.FindGameObjectsWithTag("Spawner"))
+        {
+            spawner.GetComponent<BicycleSpawner>().spawningSpeed = _slider.value;
+        }
+    }
 }
