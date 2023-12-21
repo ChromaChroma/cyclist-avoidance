@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -9,13 +10,11 @@ public class SimpleNavMeshAi : MonoBehaviour
     public Transform goal;
 
     private NavMeshAgent _agent;
-    private MeshRenderer _meshRenderer;
     private float _goalLocationOffset;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _meshRenderer = gameObject.GetComponent<MeshRenderer>();
     }
 
     private void Start()
@@ -30,8 +29,7 @@ public class SimpleNavMeshAi : MonoBehaviour
 
     private void Update()
     {
-        var goalPos = goal.transform.position;
-        if (Vector3.Distance(goalPos, transform.position) <= _goalLocationOffset )
+        if (Vector3.Distance(goal.transform.position, transform.position) <= _goalLocationOffset )
         {
             Destroy(gameObject);
         }

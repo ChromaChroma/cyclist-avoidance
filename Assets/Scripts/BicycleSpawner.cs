@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 public class BicycleSpawner : MonoBehaviour
 {
     [SerializeField] [Range(0.1f, 10.0f)] [Tooltip("Time between spawning cyclists")]
-    private float spawningSpeed = 1f;
+    public float spawningSpeed = 1f;
 
     [SerializeField] [Tooltip("GameObject (Cyclist) to spawn")]
     public GameObject spawnObject;
@@ -27,6 +27,7 @@ public class BicycleSpawner : MonoBehaviour
             // Spawn Cyclist
             var spawnedCyclist = Instantiate(spawnObject);
             spawnedCyclist.transform.position = transform.position;
+            Debug.Log($"Spawner: {transform.position}, Bicycle: {spawnedCyclist.transform.position}");
             
             var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
             cyclistAi.goal = goalObject.transform;

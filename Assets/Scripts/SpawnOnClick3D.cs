@@ -8,6 +8,7 @@ public class SpawnOnClick3D : MonoBehaviour
     [SerializeField] public GameObject _gameObject;
     [SerializeField] private ToolMode _requiredToolMode = ToolMode.Spawner;
     [SerializeField] [CanBeNull] public Action _onSpawnClick;
+    [SerializeField] [CanBeNull] public Action _onDespawnClick;
     
     private void Update()
     {
@@ -58,6 +59,9 @@ public class SpawnOnClick3D : MonoBehaviour
                 .StartsWith(_gameObject.name)) // Check hit on same type as GameObject spawned
         {
             Destroy(hit.collider.gameObject);
+            
+            // Lastly, run action
+            _onDespawnClick?.Invoke();
         }
     }
 }

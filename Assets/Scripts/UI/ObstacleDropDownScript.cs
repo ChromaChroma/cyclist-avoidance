@@ -18,16 +18,12 @@ public class ObstacleDropDownScript : MonoBehaviour
         _navMeshSurface = FindObjectOfType<NavMeshSurface>();
         _spawnComponent = GetComponent<SpawnOnClick3D>();
             
-        _spawnComponent._onSpawnClick = () =>
-        {
-            _navMeshSurface.UpdateNavMesh(_navMeshSurface.navMeshData);
-        };
+        _spawnComponent._onSpawnClick = () =>_navMeshSurface.UpdateNavMesh(_navMeshSurface.navMeshData);
+        _spawnComponent._onDespawnClick = () =>_navMeshSurface.UpdateNavMesh(_navMeshSurface.navMeshData);
         
         _dropdown.onValueChanged.AddListener(UpdateObstacle);
         
-        _obstacles = Resources.LoadAll("Obstacles", typeof(GameObject))
-            .Select(o => (GameObject)o)
-            .ToArray();
+        _obstacles = (GameObject[]) Resources.LoadAll("Obstacles", typeof(GameObject));
         
         LoadOptions();
     }
