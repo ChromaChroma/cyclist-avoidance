@@ -2994,7 +2994,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6325774102725624840, guid: 9c2db287a28e17148b682bec53a88337, type: 3}
       propertyPath: _baseText
-      value: Spawn delay
+      value: Spawn delay (s)
       objectReference: {fileID: 0}
     - target: {fileID: 6325774102725624840, guid: 9c2db287a28e17148b682bec53a88337, type: 3}
       propertyPath: _initialize.m_PersistentCalls.m_Calls.Array.data[0].m_Mode

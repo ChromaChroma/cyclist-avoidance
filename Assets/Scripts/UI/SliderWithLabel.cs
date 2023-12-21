@@ -42,7 +42,7 @@ public class SliderWithLabel : MonoBehaviour
         _initialize.Invoke();
     }
 
-    private void UpdateSliderLabel(float currentSpeed) => _labelText.text = $"{_baseText} ({currentSpeed:F1}):";
+    private void UpdateSliderLabel(float currentSpeed) => _labelText.text = $"{_baseText} [{currentSpeed:F1}]";
     
     public float CurrentValue() => _slider.value;
 }
