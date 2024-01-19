@@ -26,7 +26,9 @@ public class BicycleSpawner : MonoBehaviour
 
             // Spawn Cyclist
             var spawnedCyclist = Instantiate(spawnObject);
+            Cyclists.cyclistList.Add(spawnedCyclist);
             spawnedCyclist.transform.position = transform.position;
+            spawnedCyclist.transform.rotation = transform.rotation;
             
             var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
             cyclistAi.goal = goalObject.transform;
