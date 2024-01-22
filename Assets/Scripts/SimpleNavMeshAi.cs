@@ -2,6 +2,7 @@ using System;
 using CollisionAvoidance;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
 
 public class SimpleNavMeshAi : MonoBehaviour
 {
@@ -12,7 +13,17 @@ public class SimpleNavMeshAi : MonoBehaviour
     private CollisionAvoidanceAlgorithm _avoidanceAlgorithm;
     
     // Show Radii fields
-    private bool _showRadii = true;
+    private bool _showRadii;
+
+    public bool ShowRadii
+    {
+        set 
+        {
+            breakCircleRenderer.enabled = value;
+            steerCircleRenderer.enabled = value;
+            _showRadii = value;
+        }
+    }
     [SerializeField] private LineRenderer breakCircleRenderer;
     [SerializeField] private LineRenderer steerCircleRenderer;
 

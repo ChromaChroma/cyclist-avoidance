@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 public class BicycleSpawner : MonoBehaviour
 {
@@ -17,6 +13,8 @@ public class BicycleSpawner : MonoBehaviour
 
     private float _time;
 
+    public bool RadiiActive;
+
     void Update()
     {
         _time += Time.deltaTime;
@@ -26,6 +24,8 @@ public class BicycleSpawner : MonoBehaviour
 
             // Spawn Cyclist
             var spawnedCyclist = Instantiate(spawnObject);
+            spawnObject.GetComponent<SimpleNavMeshAi>().ShowRadii = RadiiActive;
+            Debug.Log($"Active?: {RadiiActive}");
             Cyclists.cyclistList.Add(spawnedCyclist);
             spawnedCyclist.transform.position = transform.position;
             spawnedCyclist.transform.rotation = transform.rotation;
