@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class BicycleSpawner : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class BicycleSpawner : MonoBehaviour
 
     private float _time;
 
-    public bool RadiiActive;
+    public bool radiiActive;
 
     void Update()
     {
@@ -24,18 +25,14 @@ public class BicycleSpawner : MonoBehaviour
 
             // Spawn Cyclist
             var spawnedCyclist = Instantiate(spawnObject);
-            Debug.Log($"Spawner: {RadiiActive}");
-            var ai = spawnObject.GetComponent<SimpleNavMeshAi>();
-            ai.ShowRadii = RadiiActive;
-            Debug.Log($"Spawner:ai{ai.ShowRadii}");
-            Cyclists.cyclistList.Add(spawnedCyclist);
             spawnedCyclist.transform.position = transform.position;
-            spawnedCyclist.transform.rotation = transform.rotation;
             
             var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
+            cyclistAi.ShowRadii = radiiActive;
             cyclistAi.goal = goalObject.transform;
 
             // Add cyclist to collective list of agents (for collision checks and nearest neighbours)
+            Cyclists.cyclistList.Add(spawnedCyclist);
 
         }
     }

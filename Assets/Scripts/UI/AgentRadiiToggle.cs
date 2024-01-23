@@ -40,7 +40,7 @@ public class AgentRadiiToggle : MonoBehaviour
 
         foreach (var spawner in GameObject.FindGameObjectsWithTag("Spawner"))
         {
-            spawner.GetComponent<BicycleSpawner>().RadiiActive = active;
+            spawner.GetComponent<BicycleSpawner>().radiiActive = active;
         }
     }
 
