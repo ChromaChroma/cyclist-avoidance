@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine.AI;
 using Vector3 = UnityEngine.Vector3;
 
@@ -18,7 +19,7 @@ namespace CollisionAvoidance
         
         // Internal properties 
         private float _maxRadius;
-        private NavMeshAgent _agent; 
+        private readonly NavMeshAgent _agent; 
         public CollisionAvoidanceAlgorithm(NavMeshAgent agent)
         {
             _agent = agent;
@@ -39,13 +40,13 @@ namespace CollisionAvoidance
             // Brake radius
             // min_brake_radius + v * linear constant + v^2
             // 3+ 0.15 + (v/10)^2
-            var brakeRangeCurveFunction = (float)(3 + v * 0.15f + Math.Pow(v, 2));
+            var brakeRangeCurveFunction = (float)(3 + v * 0.15f + Math.Pow(v/10, 2));
             BrakeRangeRadius = brakeRangeCurveFunction;
             
             // Steer radius
             // min_steer_radius + v * linear constant + v^2
             // 4 + 0.2x + (v/13)^2
-            var steerRangeCurveFunction = (float)(4 + v * 0.2f + Math.Pow(v, 2));
+            var steerRangeCurveFunction = (float)(4 + v * 0.2f + Math.Pow(v/13, 2));
             SteerRangeRadius = steerRangeCurveFunction;
             
             
@@ -59,7 +60,7 @@ namespace CollisionAvoidance
             {
                 UpdateRadii();
             }
-            
+      
             // List for accumulating avoidance vectors
             List<Vector3> collisionAvoidanceVectors = new List<Vector3>();
 
@@ -68,19 +69,16 @@ namespace CollisionAvoidance
             {
                 // Check Euclidean distance between cyclists
                 var distance = Vector3.Distance(currentCyclist.transform.position, c.transform.position);
-                
                 if (distance > _maxRadius) continue; // Ignore, outside of reaction range
-
-
+                
+                // Check if agent is in FOV
                 var angleToOther = RelativeAngleToCyclist(currentCyclist, c); //Relative angle [-180,180]
                 const int maxFOVAngle = 135; // Temp, Angle (+ and -) angle of FOV. 
                 if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
-
-                var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
-
+                
                 var avoidanceVector = preferredVelocity;
 
-
+                var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
                 if (isCollisionImminent && distance < BrakeRangeRadius)
                 {
                     // Do braking logic

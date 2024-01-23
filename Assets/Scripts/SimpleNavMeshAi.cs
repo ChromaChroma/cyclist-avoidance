@@ -17,6 +17,7 @@ public class SimpleNavMeshAi : MonoBehaviour
 
     public bool ShowRadii
     {
+        get => _showRadii;
         set 
         {
             breakCircleRenderer.enabled = value;
@@ -73,7 +74,7 @@ public class SimpleNavMeshAi : MonoBehaviour
 
     private void Update()
     {
-        
+        Debug.Log($"Active: {breakCircleRenderer.enabled}Ac2: {steerCircleRenderer.enabled}, s: {_showRadii}");
         if (Vector3.Distance(goal.transform.position, transform.position) <= _goalLocationOffset)
         {
             // Is at goal destination
@@ -87,8 +88,8 @@ public class SimpleNavMeshAi : MonoBehaviour
             var newPos = trans.position + movementVector * Time.deltaTime;
             _agent.nextPosition = newPos;
             trans.position = newPos;
-            
-            if (_showRadii)
+            Debug.Log($"m:{ShowRadii}");
+            if (ShowRadii)
             {
                 Debug.Log($"brake: {_avoidanceAlgorithm.BrakeRangeRadius}, ster:{_avoidanceAlgorithm.SteerRangeRadius}");
                 DrawCircle(breakCircleRenderer, _avoidanceAlgorithm.BrakeRangeRadius);

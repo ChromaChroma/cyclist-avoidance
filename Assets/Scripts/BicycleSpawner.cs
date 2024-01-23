@@ -24,8 +24,10 @@ public class BicycleSpawner : MonoBehaviour
 
             // Spawn Cyclist
             var spawnedCyclist = Instantiate(spawnObject);
-            spawnObject.GetComponent<SimpleNavMeshAi>().ShowRadii = RadiiActive;
-            Debug.Log($"Active?: {RadiiActive}");
+            Debug.Log($"Spawner: {RadiiActive}");
+            var ai = spawnObject.GetComponent<SimpleNavMeshAi>();
+            ai.ShowRadii = RadiiActive;
+            Debug.Log($"Spawner:ai{ai.ShowRadii}");
             Cyclists.cyclistList.Add(spawnedCyclist);
             spawnedCyclist.transform.position = transform.position;
             spawnedCyclist.transform.rotation = transform.rotation;
