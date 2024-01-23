@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 277540416646405772}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.57699996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -162,7 +162,7 @@ Transform:
   m_GameObject: {fileID: 3396808056353132933}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.57699996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -338,7 +338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400002, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.112
+      value: -0.689
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.x
@@ -346,31 +346,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.49912155
+      value: -0.077878416
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.10901004
+      value: -0.68601
       objectReference: {fileID: 0}
     - target: {fileID: 400012, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.7226335
+      value: -1.2996334
       objectReference: {fileID: 0}
     - target: {fileID: 400014, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.11129892
+      value: -0.6882989
       objectReference: {fileID: 0}
     - target: {fileID: 400016, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.11129892
+      value: -0.6882989
       objectReference: {fileID: 0}
     - target: {fileID: 400018, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.3336594
+      value: -0.9106593
       objectReference: {fileID: 0}
     - target: {fileID: 400024, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.72296417
+      value: -1.2999641
       objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 3561aae6c1848f84abf3a197a38aa26a, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -451,19 +451,19 @@ NavMeshAgent:
   m_GameObject: {fileID: 598136216869198265}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 1
+  m_Radius: 0.4
   m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 1.4
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
+  m_ObstacleAvoidanceType: 0
 --- !u!114 &8692490705600250141
 MonoBehaviour:
   m_ObjectHideFlags: 0

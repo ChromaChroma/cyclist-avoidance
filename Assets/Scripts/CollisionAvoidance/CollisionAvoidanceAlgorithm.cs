@@ -62,7 +62,8 @@ namespace CollisionAvoidance
             }
       
             // List for accumulating avoidance vectors
-            List<Vector3> collisionAvoidanceVectors = new List<Vector3>();
+            // List<Vector3> collisionAvoidanceVectors = new List<Vector3>();
+            List<Vector3> brakeVectors = new List<Vector3>();
 
             // Find all cyclists within radius max (brake, steering)
             foreach (var c in _cyclists)
@@ -76,98 +77,56 @@ namespace CollisionAvoidance
                 const int maxFOVAngle = 135; // Temp, Angle (+ and -) angle of FOV. 
                 if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
                 
-                var avoidanceVector = preferredVelocity;
-
                 var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
-                if (isCollisionImminent && distance < BrakeRangeRadius)
+                if (distance < BrakeRangeRadius)
                 {
-                    // Do braking logic
-
+                    // Braking logic
                     if (angleToOther < 0) //And is not traveling same direction (within angle)
-                    {
-                        // Other cyclist on the left
-
-                        //>> Prefer maintaining speed or speeding up
-
-                        var spedUpVector = avoidanceVector * 1.2f;
-                        const float maxSpeed = 3.5f;
-                        if (spedUpVector.magnitude > maxSpeed)
-                        {
-                            avoidanceVector = spedUpVector * (maxSpeed / spedUpVector.magnitude);
-                        }
-                        else
-                        {
-                            avoidanceVector = spedUpVector;
-                        }
-
-                        Debug.Log(
-                            $"Mag:{spedUpVector.magnitude}, pref:{preferredVelocity.magnitude}, av:{avoidanceVector.magnitude}");
-                        Debug.Log($"original:{preferredVelocity}, spedup:{spedUpVector}, eventual:{avoidanceVector}");
+                    {   // Other cyclist on the left. Prefer maintaining speed or speeding up
+                        brakeVectors.Add(-preferredVelocity * 0.9f);
                     }
                     else if (angleToOther >= 0) //And is not traveling same direction (within angle)
-                    {
-                        // Other cyclist on the right
-
-                        //>> Prefer braking and slowing down
-
-                        // const float minColTime = 3;
-                        // Debug.Log($"SlowDownBEFORE:{avoidanceVector}");
-                        // if (avoidanceVector.magnitude <= 0.5)
-                        // {
-                        //     //keep avoidance vector as is
-                        // } else if (tCol <= minColTime) // Strong breaking based on time until collision
-                        // {
-                        //     avoidanceVector *= 0.9f * (minColTime / tCol);
-                        // }
-                        // else //within break range, outside strong break range
-                        // {
-                        //     avoidanceVector *= 0.9f;
-                        // }
-                        // Debug.Log($"Preff:{preferredVelocity}");
-                        // Debug.Log($"SlowDown:{avoidanceVector}");
+                    {   // Other cyclist on the right. Prefer braking and slowing down
+                        
                     }
                 }
 
                 if (isCollisionImminent && distance < SteerRangeRadius)
                 {
-                    // // Do steer logic
+                    // Do steer logic
                 }
-
-                collisionAvoidanceVectors.Add(avoidanceVector);
             }
-
-            var vectorsSize = collisionAvoidanceVectors.Count;
-            if (vectorsSize != 0)
+            
+            // Apply brake vector to velocity vector
+            var length = brakeVectors.Count;
+            if (length != 0)
             {
-                var accumulativeVector =
-                    collisionAvoidanceVectors.Aggregate(Vector3.zero, (next, acc) => acc + next) * (1f / vectorsSize);
-                return (preferredVelocity + accumulativeVector) * 0.5f;
+                var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
+                Debug.Log($"Acc Brake: {accumulativeVector}, pref:{preferredVelocity}, comb ={preferredVelocity + accumulativeVector}");
+                preferredVelocity += accumulativeVector;
             }
-
+            
             return preferredVelocity;
         }
 
-        private float RelativeAngleToCyclist(GameObject currentCyclist, GameObject gameObject)
+        private float RelativeAngleToCyclist(GameObject currentCyclist, GameObject other)
         {
-            return 45; //temp
-            
-            //Calculate the degrees/radians [-180,180] the other cyclist is 
-            throw new NotImplementedException();
+            var v1 = currentCyclist.GetComponent<NavMeshAgent>().velocity;
+            var d = other.transform.position - currentCyclist.transform.position;
+            return Vector3.SignedAngle(v1, d, Vector3.up);
         }
 
         // Roughly calculates if and when two agents would collide
         private (bool, float) ApproximateCollision(GameObject cur, GameObject other)
         {
-            // Implement an collision approximation/prediction algorithm
+            // Collision calculate algorithm for two object trajectories
+            // Based on: https://math.stackexchange.com/questions/4713617/how-to-calculate-if-2-objects-following-2-different-arbitrary-trajectories-will
 
             var cPos = cur.transform.position;
             var oPos = other.transform.position;
 
-            var cAgent = cur.GetComponent<NavMeshAgent>();
-            var oAgent = other.GetComponent<NavMeshAgent>();
-
-            var cVel = cAgent.velocity;
-            var oVel = oAgent.velocity;
+            var cVel = cur.GetComponent<NavMeshAgent>().velocity;
+            var oVel = other.GetComponent<NavMeshAgent>().velocity;
 
 
             var deltaX = cPos.x - oPos.x;
@@ -181,7 +140,6 @@ namespace CollisionAvoidance
             var t = Convert.ToSingle((deltaX * deltaVelX + deltaY * deltaVelY + deltaZ * deltaVelZ)
                                      / (Math.Pow(deltaVelX, 2) + Math.Pow(deltaVelY, 2) + Math.Pow(deltaVelZ, 2)));
 
-            // Debug.Log($"time to collision::{t}");
             return t is float.NaN or < 0
                 ? (false, -1) // t < 0 is not collision after NOW, return false
                 : (true, t);

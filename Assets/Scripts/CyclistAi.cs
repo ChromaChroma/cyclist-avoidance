@@ -34,15 +34,11 @@ public class CyclistAi : MonoBehaviour
         _speed = dot > 0 ? 1 : -1;
         
         float angleToDir = Vector3.SignedAngle(transform.up, dirToMovePosition, Vector3.up);
-        Debug.Log("AngleToDir: " + angleToDir);
         if (angleToDir > 0)
         {
             
         }
         _turnAmount = angleToDir > 0 ? 1f : -1f; // Due to left being - on the y
-        
-        
-        
     }
 
     private void Move()
@@ -89,12 +85,8 @@ public class CyclistAi : MonoBehaviour
         }
         float speedNormalized = speed / speedMax;
         float invertSpeedNormalized = Mathf.Clamp(1 - speedNormalized, .75f, 1f);
-        //
-        // Debug.Log("turn speed: " + invertSpeedNormalized);
-        // Debug.Log("turn speed: " + _turnAmount);
-        //
+      
         turnSpeed = Mathf.Clamp(_turnAmount, -turnSpeedMax, turnSpeedMax); 
-        // Debug.Log("turn speed: " + turnSpeed);
         
         var turnRadius = turnSpeed * (invertSpeedNormalized * 1f) ;
         transform.Rotate(0, 0, turnRadius );
