@@ -68,7 +68,6 @@ public class SimpleNavMeshAi : MonoBehaviour
             _destinations.Add(goal.transform.position);
 
 
-            //_agent.agentTypeID = 1;
             _agent.radius = 0.5f;
             _agent.destination = _destinations[0];
 
@@ -133,14 +132,18 @@ public class SimpleNavMeshAi : MonoBehaviour
             //    var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
             //    movementVector = Quaternion.AngleAxis(angle, Vector3.up) * movementVector;
             //}
-            
+
             // Move based on movement vector and CA
-            _agent.Move(movementVector * (Time.deltaTime * 0.1f));
-            
             // Rotate Cyclist roughly to face next move's position
-            Vector3 direction = (_agent.nextPosition - curPos).normalized;
+
+            Vector3 direction = _agent.velocity.normalized;
             Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime);
+
+
+            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime); // _agent.Move(movementVector * (Time.deltaTime*.1f));
+            
+
         }
         
         if (ShowRadii)

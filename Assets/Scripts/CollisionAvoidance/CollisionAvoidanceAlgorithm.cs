@@ -68,32 +68,35 @@ namespace CollisionAvoidance
             // Find all cyclists within radius max (brake, steering)
             foreach (var c in _cyclists)
             {
-                // Check Euclidean distance between cyclists
-                var distance = Vector3.Distance(currentCyclist.transform.position, c.transform.position);
-                if (distance > _maxRadius) continue; // Ignore, outside of reaction range
-                
-                // Check if agent is in FOV
-                var angleToOther = RelativeAngleToCyclist(currentCyclist, c); //Relative angle [-180,180]
-                const int maxFOVAngle = 135; // Temp, Angle (+ and -) angle of FOV. 
-                if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
-                
-                var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
-                if (distance < BrakeRangeRadius)
+                if (c != currentCyclist)
                 {
-                    // Braking logic
-                    if (angleToOther < 0) //And is not traveling same direction (within angle)
-                    {   // Other cyclist on the left. Prefer maintaining speed or speeding up
-                        brakeVectors.Add(-preferredVelocity * 0.9f);
-                    }
-                    else if (angleToOther >= 0) //And is not traveling same direction (within angle)
-                    {   // Other cyclist on the right. Prefer braking and slowing down
-                        
-                    }
-                }
+                    // Check Euclidean distance between cyclists
+                    var distance = Vector3.Distance(currentCyclist.transform.position, c.transform.position);
+                    if (distance > _maxRadius) continue; // Ignore, outside of reaction range
 
-                if (isCollisionImminent && distance < SteerRangeRadius)
-                {
-                    // Do steer logic
+                    // Check if agent is in FOV
+                    var angleToOther = RelativeAngleToCyclist(currentCyclist, c); //Relative angle [-180,180]
+                    const int maxFOVAngle = 135; // Temp, Angle (+ and -) angle of FOV. 
+                    if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
+
+                    var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
+                    if (distance < BrakeRangeRadius)
+                    {
+                        // Braking logic
+                        if (angleToOther < 0) //And is not traveling same direction (within angle)
+                        {   // Other cyclist on the left. Prefer maintaining speed or speeding up
+                            brakeVectors.Add(-preferredVelocity * 0.1f);
+                        }
+                        else if (angleToOther >= 0) //And is not traveling same direction (within angle)
+                        {   // Other cyclist on the right. Prefer braking and slowing down
+                            brakeVectors.Add(-preferredVelocity * 0.9f);
+                        }
+                    }
+
+                    if (isCollisionImminent && distance < SteerRangeRadius)
+                    {
+                        // Do steer logic
+                    }
                 }
             }
             
@@ -102,7 +105,7 @@ namespace CollisionAvoidance
             if (length != 0)
             {
                 var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
-                Debug.Log($"Acc Brake: {accumulativeVector}, pref:{preferredVelocity}, comb ={preferredVelocity + accumulativeVector}");
+                //Debug.Log($"Acc Brake: {accumulativeVector}, pref:{preferredVelocity}, comb ={preferredVelocity + accumulativeVector}");
                 preferredVelocity += accumulativeVector;
             }
             
@@ -144,5 +147,6 @@ namespace CollisionAvoidance
                 ? (false, -1) // t < 0 is not collision after NOW, return false
                 : (true, t);
         }
+
     }
 }
