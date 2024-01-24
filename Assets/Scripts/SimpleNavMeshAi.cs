@@ -108,7 +108,6 @@ public class SimpleNavMeshAi : MonoBehaviour
         var curPos = transform.position;
         if (Vector3.Distance(_agent.destination, curPos) <= _goalLocationOffset)
         {
-            Debug.Log("reached half goal");
             if (_destinations.Count == 1)
             {
                 Cyclists.cyclistList.Remove(gameObject);
@@ -126,14 +125,14 @@ public class SimpleNavMeshAi : MonoBehaviour
             // Run Collision Avoidance using desired velocity
             var movementVector = _avoidanceAlgorithm.AvoidCollisions(gameObject, _agent.desiredVelocity);
             var m = movementVector;
-            // While on navmesh prefer to push to the right
-            if (_agent.isOnNavMesh && _agent.FindClosestEdge(out var h))
-            {
-                // Check if closest edge is on right side of agent, based on angle
-                var onRight = 0 < Vector3.SignedAngle(movementVector, h.position - transform.position, Vector3.up);
-                var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
-                movementVector = Quaternion.AngleAxis(angle, Vector3.up) * movementVector;
-            }
+            //// While on navmesh prefer to push to the right
+            //if (_agent.isOnNavMesh && _agent.FindClosestEdge(out var h))
+            //{
+            //    // Check if closest edge is on right side of agent, based on angle
+            //    var onRight = 0 < Vector3.SignedAngle(movementVector, h.position - transform.position, Vector3.up);
+            //    var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
+            //    movementVector = Quaternion.AngleAxis(angle, Vector3.up) * movementVector;
+            //}
             
             // Move based on movement vector and CA
             _agent.Move(movementVector * (Time.deltaTime * 0.1f));
