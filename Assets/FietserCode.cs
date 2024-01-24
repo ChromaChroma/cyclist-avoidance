@@ -48,7 +48,7 @@ public class FietserController : MonoBehaviour
 
             if (Vector3.Dot(fiets2V-fiets1V, rotateRight) > 0) //if the distance vector between the two cyclists is in the same direction as the velocity turned 90 degrees to the right
             {
-                bForce = -fiets1V * .1f;
+                bForce = -fiets1V * .5f;
             }
             else
             {
@@ -62,7 +62,7 @@ public class FietserController : MonoBehaviour
 
             if (Vector3.Dot(fiets1V - fiets2V, rotateRight) > 0) //if the distance vector between the two cyclists is in the same direction as the velocity turned 90 degrees to the right
             {
-                bForce = -fiets2V * .1f;
+                bForce = -fiets2V * .5f;
             }
             else
             {
