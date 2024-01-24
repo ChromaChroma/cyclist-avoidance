@@ -10,8 +10,8 @@ public class CyclistAi : MonoBehaviour
 
     private float _speed;
     private float _turnAmount;
-    
-    
+
+
     // Start is called before the first frame update
     void Start()
     {
