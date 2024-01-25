@@ -4,5 +4,6 @@ using UnityEngine;
 public class Cyclists
 {
     public static List<GameObject> cyclistList = new();
-    public static int successes = 0;
+    public static List<float> successtimes = new List<float>();
+    public static List<float> collisiontimes = new List<float>();
 }

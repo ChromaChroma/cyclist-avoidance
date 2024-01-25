@@ -22,6 +22,9 @@ namespace CollisionAvoidance
         private float _maxRadius;
         private readonly NavMeshAgent _agent;
 
+        public bool collides = false;
+        private List<GameObject> colCyclists = new List<GameObject>();
+
         public CollisionAvoidanceAlgorithm(NavMeshAgent agent)
         {
             _agent = agent;
@@ -69,6 +72,19 @@ namespace CollisionAvoidance
 
                 // Check Euclidean distance between cyclists
                 var distance = Vector3.Distance(currentCyclist.transform.position, c.transform.position);
+                if (distance < 0.7)
+                {
+                    this.collides = true;
+                    colCyclists.Add(c);
+                }
+                else if (colCyclists.Contains(c))
+                {
+                    colCyclists.Remove(c);
+                    
+                    if (colCyclists.Count == 0) this.collides = false;
+                }
+                
+
                 if (distance > _maxRadius) continue; // Ignore, outside of reaction range
 
                 // Check if agent is in FOV
@@ -79,6 +95,7 @@ namespace CollisionAvoidance
                 var willCollide = WillCollide(currentCyclist, c);
                 if (distance < BrakeRangeRadius && willCollide)
                 {   // Braking logic
+
                     brakeVectors.Add(-preferredVelocity * BrakingForce(distance, angleToOther));
                 }
                 

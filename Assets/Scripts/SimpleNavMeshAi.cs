@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.IO;
 using CollisionAvoidance;
 using UnityEngine;
 using UnityEngine.AI;
@@ -20,6 +21,7 @@ public class SimpleNavMeshAi : MonoBehaviour
 
     private List<Vector3> _destinations = new List<Vector3>();
 
+    public float timeCollided = 0;
 
     // CA
     private CollisionAvoidanceAlgorithm _avoidanceAlgorithm;
@@ -112,9 +114,15 @@ public class SimpleNavMeshAi : MonoBehaviour
             {
                 Cyclists.cyclistList.Remove(gameObject);
                 Destroy(gameObject);
-                Cyclists.successes++;
+                Cyclists.successtimes.Add(Time.time);
+                Cyclists.collisiontimes.Add(timeCollided);
+
+                StreamWriter sw = new StreamWriter("C:\\CrowdSim\\succColl.txt", append: true);
+                sw.WriteLine($"{Time.time} {timeCollided}");
+                sw.Close();
+
                 Debug.Log(Time.time);
-                Debug.Log(Cyclists.successes.ToString()); // todo: lijst maken van [time] waarop succes is behaald, volledige lijst voor 1 spawn-frequentie.
+                Debug.Log(timeCollided);
             }
             else
             {
@@ -127,6 +135,13 @@ public class SimpleNavMeshAi : MonoBehaviour
         {
             // Run Collision Avoidance using desired velocity
             var movementVector = _avoidanceAlgorithm.AvoidCollisions(gameObject, _agent.desiredVelocity);
+            bool collides = _avoidanceAlgorithm.collides;
+
+            if (collides)
+            {
+                timeCollided += Time.deltaTime;
+            }
+
             var m = movementVector;
             // While on navmesh prefer to push to the right
             if (_agent.isOnNavMesh && _agent.FindClosestEdge(out var h))

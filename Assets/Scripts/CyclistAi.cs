@@ -22,8 +22,6 @@ public class CyclistAi : MonoBehaviour
     void Update()
     {
         UpdateSpeed();
-
-       
         Move();
     }
 
