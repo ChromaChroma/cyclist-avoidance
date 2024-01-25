@@ -83,14 +83,7 @@ namespace CollisionAvoidance
                     if ((distance < BrakeRangeRadius) && willCollide(currentCyclist, c))
                     {
                         // Braking logic
-                        if (angleToOther < 0) //And is not traveling same direction (within angle)
-                        {   // Other cyclist on the left. Prefer maintaining speed or speeding up
-                            brakeVectors.Add(-preferredVelocity * 0.1f);
-                        }
-                        else if (angleToOther >= 0) //And is not traveling same direction (within angle)
-                        {   // Other cyclist on the right. Prefer braking and slowing down
-                            brakeVectors.Add(-preferredVelocity * 0.9f);
-                        }
+                        brakeVectors.Add(-preferredVelocity * brakingForce(distance, angleToOther));
                     }
 
                     if (isCollisionImminent && distance < SteerRangeRadius)
@@ -152,10 +145,11 @@ namespace CollisionAvoidance
         private bool willCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
         {
             float dist = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position);
-            float futureDist = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized);
-
-            if (futureDist < dist) return true; else return false;
+            float futureDistCur = Vector3.Distance(currentCyclist.transform.position + currentCyclist.GetComponent<NavMeshAgent>().velocity.normalized, otherCyclist.transform.position);
+            float futureDistOth = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized);
+            if ((futureDistCur < dist) && (futureDistOth < dist)) return true; else return false;
         }
+
 
         private Vector3 largestVec(List<Vector3> l)
         {
@@ -166,5 +160,32 @@ namespace CollisionAvoidance
             }
             return res;
         }
+
+        private float brakingForce(float distance, float angleToOther)
+        {
+            if (distance <= 1)
+            {
+                if (angleToOther < 0)
+                {
+                    return 1f;
+                }
+                else
+                {
+                    return 2f;
+                } //in case of problems, put back to 1
+            }
+            else
+            {
+                if (angleToOther < 0)
+                {
+                    return .5f;
+                }
+                else
+                {
+                    return .9f;
+                }
+                
+            }
+        } // TODO: verder werken aan metric: nu heb ik alleen aantal fietsers dat aankomt gegeven een bepaalde tijd, kan time signature meegeven met het tellen om de flow per (x aantal seconden) in kaart te brengen
     }
 }

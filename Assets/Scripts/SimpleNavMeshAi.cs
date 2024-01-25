@@ -20,6 +20,7 @@ public class SimpleNavMeshAi : MonoBehaviour
 
     private List<Vector3> _destinations = new List<Vector3>();
 
+
     // CA
     private CollisionAvoidanceAlgorithm _avoidanceAlgorithm;
 
@@ -111,6 +112,8 @@ public class SimpleNavMeshAi : MonoBehaviour
             {
                 Cyclists.cyclistList.Remove(gameObject);
                 Destroy(gameObject);
+                Cyclists.successes++;
+                Debug.Log(Cyclists.successes.ToString());
             }
             else
             {
@@ -138,11 +141,11 @@ public class SimpleNavMeshAi : MonoBehaviour
 
             Vector3 direction = _agent.velocity.normalized;
             Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime*2f); //can change 2f to 1f or something else
 
 
-            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime); // _agent.Move(movementVector * (Time.deltaTime*.1f));
-            
+            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*2f); // _agent.Move(movementVector * (Time.deltaTime*.1f)); //can change 2f to 1f or something else
+
 
         }
         
