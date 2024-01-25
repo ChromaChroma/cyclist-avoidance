@@ -10,16 +10,19 @@ namespace CollisionAvoidance
 {
     public class CollisionAvoidanceAlgorithm
     {
+        const int maxFOVAngle = 135;
+
         // Configurable properties
         public bool AutoUpdateRadii = true;
-        
+
         // Accessable properties
         public float BrakeRangeRadius { get; private set; }
         public float SteerRangeRadius { get; private set; }
-        
+
         // Internal properties 
         private float _maxRadius;
-        private readonly NavMeshAgent _agent; 
+        private readonly NavMeshAgent _agent;
+
         public CollisionAvoidanceAlgorithm(NavMeshAgent agent)
         {
             _agent = agent;
@@ -34,21 +37,16 @@ namespace CollisionAvoidance
         {
             // Update radii of agent based on current velocity
             var v = _agent.velocity.magnitude;
-            
+
             // The following formulas are based on rough visual copy of the comfort zone paper figure 5
-            
-            // Brake radius
-            // min_brake_radius + v * linear constant + v^2
-            // 3+ 0.15 + (v/10)^2
-            var brakeRangeCurveFunction = (float)(3 + v * 0.15f + Math.Pow(v/10, 2));
+
+            // Brake radius function: 3+ 0.15 + (v/10)^2
+            var brakeRangeCurveFunction = (float)(3 + v * 0.15f + Math.Pow(v / 10, 2));
             BrakeRangeRadius = brakeRangeCurveFunction;
-            
-            // Steer radius
-            // min_steer_radius + v * linear constant + v^2
-            // 4 + 0.2x + (v/13)^2
-            var steerRangeCurveFunction = (float)(4 + v * 0.2f + Math.Pow(v/13, 2));
+
+            // Steer radius function: 4 + 0.2x + (v/13)^2
+            var steerRangeCurveFunction = (float)(4 + v * 0.2f + Math.Pow(v / 13, 2));
             SteerRangeRadius = steerRangeCurveFunction;
-            
             
             // Update max Radius to largest radius
             _maxRadius = Math.Max(BrakeRangeRadius, SteerRangeRadius);
@@ -60,49 +58,39 @@ namespace CollisionAvoidance
             {
                 UpdateRadii();
             }
-      
-            // List for accumulating avoidance vectors
-            // List<Vector3> collisionAvoidanceVectors = new List<Vector3>();
-            List<Vector3> brakeVectors = new List<Vector3>();
+
+            var largestBrakeVector = Vector3.zero;
 
             // Find all cyclists within radius max (brake, steering)
             foreach (var c in _cyclists)
             {
-                if (c != currentCyclist)
+                if (c == currentCyclist) continue; // Ignore self
+
+                // Check Euclidean distance between cyclists
+                var distance = Vector3.Distance(currentCyclist.transform.position, c.transform.position);
+                if (distance > _maxRadius) continue; // Ignore outside of reaction range
+
+                // Check if agent is in FOV
+                var angleToOther = RelativeAngleToCyclist(currentCyclist, c);
+                if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore outside of FOV
+
+                if (distance < BrakeRangeRadius && WillCollide(currentCyclist, c))
                 {
-                    // Check Euclidean distance between cyclists
-                    var distance = Vector3.Distance(currentCyclist.transform.position, c.transform.position);
-                    if (distance > _maxRadius) continue; // Ignore, outside of reaction range
-
-                    // Check if agent is in FOV
-                    var angleToOther = RelativeAngleToCyclist(currentCyclist, c); //Relative angle [-180,180]
-                    const int maxFOVAngle = 135; // Temp, Angle (+ and -) angle of FOV. 
-                    if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
-
-                    var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
-                    if (((distance < BrakeRangeRadius) && willCollide(currentCyclist, c)))
+                    // Braking logic
+                    var brakeVector = -preferredVelocity * BrakingForce(distance, angleToOther);
+                    if (brakeVector.magnitude > largestBrakeVector.magnitude)
                     {
-                        // Braking logic
-                        brakeVectors.Add(-preferredVelocity * brakingForce(distance, angleToOther));
-                    }
-
-                    if (isCollisionImminent && distance < SteerRangeRadius)
-                    {
-                        // Do steer logic
+                        largestBrakeVector = brakeVector;
                     }
                 }
+
+                var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
+                if (isCollisionImminent && distance < SteerRangeRadius)
+                {
+                    // Do steer logic
+                }
             }
-            
-            // Apply brake vector to velocity vector
-            var length = brakeVectors.Count;
-            if (length != 0)
-            {
-                var accumulativeVector = largestVec(brakeVectors); //for braking, the closest other cyclist counts
-                //var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
-                //Debug.Log($"Acc Brake: {accumulativeVector}, pref:{preferredVelocity}, comb ={preferredVelocity + accumulativeVector}");
-                preferredVelocity += accumulativeVector;
-            }
-            
+
             return preferredVelocity;
         }
 
@@ -142,51 +130,25 @@ namespace CollisionAvoidance
                 : (true, t);
         }
 
-        private bool willCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
+        private bool WillCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
         {
-            float dist = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position);
-            float futureDistCur = Vector3.Distance(currentCyclist.transform.position + currentCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f, otherCyclist.transform.position);
-            float futureDistOth = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f);
-            if (dist < .1) return true;
-            if ((futureDistCur < dist) && (futureDistOth < dist)) return true; else return false;
+            var cPos = currentCyclist.transform.position;
+            var oPos = otherCyclist.transform.position;
+
+            float dist = Vector3.Distance(cPos, oPos);
+            float futureDistCur = Vector3.Distance(cPos + currentCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f, oPos);
+            float futureDistOth = Vector3.Distance(cPos, oPos + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f);
+
+            return dist < .1 && futureDistCur < dist && futureDistOth < dist;
         }
 
-
-        private Vector3 largestVec(List<Vector3> l)
+        private float BrakingForce(float distance, float angleToOther) => distance switch
         {
-            Vector3 res = Vector3.zero;
-            foreach (Vector3 v in l)
-            {
-                if (v.magnitude > res.magnitude) res = v;
-            }
-            return res;
-        }
-
-        private float brakingForce(float distance, float angleToOther)
-        {
-            if (distance <= 1)
-            {
-                if (angleToOther < 0)
-                {
-                    return 1.5f;
-                }
-                else
-                {
-                    return 3f;
-                } //in case of problems, put back to 1
-            }
-            else
-            {
-                if (angleToOther < 0)
-                {
-                    return .7f;
-                }
-                else
-                {
-                    return .9f;
-                }
-                
-            }
-        } // TODO: verder werken aan metric: nu heb ik alleen aantal fietsers dat aankomt gegeven een bepaalde tijd, kan time signature meegeven met het tellen om de flow per (x aantal seconden) in kaart te brengen
+            <= 1 when angleToOther < 0 => 1.5f,
+            <= 1 => 3f,
+            > 1 when angleToOther < 0 => .7f,
+            > 1 => 9f,
+            _ => throw new ArgumentOutOfRangeException(nameof(distance), distance, null)
+        }; // TODO: verder werken aan metric: nu heb ik alleen aantal fietsers dat aankomt gegeven een bepaalde tijd, kan time signature meegeven met het tellen om de flow per (x aantal seconden) in kaart te brengen
     }
 }
