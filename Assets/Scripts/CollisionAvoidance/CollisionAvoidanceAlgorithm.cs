@@ -91,7 +91,8 @@ namespace CollisionAvoidance
             var length = brakeVectors.Count;
             if (length != 0)
             {
-                var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
+                // var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
+                var accumulativeVector = brakeVectors.OrderByDescending(v => v.magnitude).First();
                 // Debug.Log($"Pref: {preferredVelocity.magnitude}, brakeV:{accumulativeVector.magnitude}, comb: {(preferredVelocity + accumulativeVector).magnitude}");
                 preferredVelocity += accumulativeVector;
             }
@@ -125,7 +126,7 @@ namespace CollisionAvoidance
             // Close range 'reactive' behaviour
             <= BrakeComfortClearance when angleToOther < -80 => -0.1f,
             <= BrakeComfortClearance when angleToOther < -45 => -0.2f,
-            <= BrakeComfortClearance when angleToOther <  80 =>  1f,
+            <= BrakeComfortClearance when angleToOther <  80 =>  0.99f,
             <= BrakeComfortClearance when angleToOther >= 80 => -0.2f,
             
             // Predictive range behaviour
@@ -139,40 +140,5 @@ namespace CollisionAvoidance
         };
         
         // TODO: verder werken aan metric: nu heb ik alleen aantal fietsers dat aankomt gegeven een bepaalde tijd, kan time signature meegeven met het tellen om de flow per (x aantal seconden) in kaart te brengen
-        
-        
-        
-        // // Roughly calculates if and when two agents would collide
-        // private (bool, float) ApproximateCollision(GameObject cur, GameObject other)
-        // {
-        //     // Collision calculate algorithm for two object trajectories
-        //     // Based on: https://math.stackexchange.com/questions/4713617/how-to-calculate-if-2-objects-following-2-different-arbitrary-trajectories-will
-        //
-        //     var cPos = cur.transform.position;
-        //     var oPos = other.transform.position;
-        //
-        //     var cVel = _agent.velocity;
-        //     var oVel = other.GetComponent<NavMeshAgent>().velocity;
-        //
-        //
-        //     var deltaX = cPos.x - oPos.x;
-        //     var deltaY = cPos.y - oPos.y;
-        //     var deltaZ = cPos.z - oPos.z;
-        //
-        //     var deltaVelX = cVel.x - oVel.x;
-        //     var deltaVelY = cVel.y - oVel.y;
-        //     var deltaVelZ = cVel.z - oVel.z;
-        //
-        //     var t = Convert.ToSingle((deltaX * deltaVelX + deltaY * deltaVelY + deltaZ * deltaVelZ)
-        //                              / (Math.Pow(deltaVelX, 2) + Math.Pow(deltaVelY, 2) + Math.Pow(deltaVelZ, 2)));
-        //
-        //     return t is float.NaN or < 0
-        //         ? (false, -1) // t < 0 is not collision after NOW, return false
-        //         : (true, t);
-        // }
-
-        
     }
-    
-    
 }

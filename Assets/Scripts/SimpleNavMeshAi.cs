@@ -74,8 +74,6 @@ public class SimpleNavMeshAi : MonoBehaviour
 
             var bounds = goal.GetComponent<MeshRenderer>().bounds;
             _goalLocationOffset = Math.Min(bounds.size.x, bounds.size.z);
-            // _agent.updatePosition = false;
-            _agent.autoBraking = false; //Simulation does not really require single goal agents to stop slowly.
         }
     }
 
@@ -112,6 +110,8 @@ public class SimpleNavMeshAi : MonoBehaviour
             {
                 Cyclists.cyclistList.Remove(gameObject);
                 Destroy(gameObject);
+                
+                
                 Cyclists.successes++;
                 Debug.Log(Time.time);
                 Debug.Log(Cyclists.successes.ToString()); // todo: lijst maken van [time] waarop succes is behaald, volledige lijst voor 1 spawn-frequentie.
@@ -148,11 +148,8 @@ public class SimpleNavMeshAi : MonoBehaviour
                 Quaternion lookRotation = Quaternion.LookRotation(lR);
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f); //can change 2f to 1f or something else
             }
-
-
-            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*2f); // _agent.Move(movementVector * (Time.deltaTime*.1f)); //can change 2f to 1f or something else
-
-
+            
+            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*1f); // _agent.Move(movementVector * (Time.deltaTime*.1f)); //can change 2f to 1f or something else
         }
         
         if (ShowRadii)
