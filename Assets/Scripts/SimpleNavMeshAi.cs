@@ -113,7 +113,8 @@ public class SimpleNavMeshAi : MonoBehaviour
                 Cyclists.cyclistList.Remove(gameObject);
                 Destroy(gameObject);
                 Cyclists.successes++;
-                Debug.Log(Cyclists.successes.ToString());
+                Debug.Log(Time.time);
+                Debug.Log(Cyclists.successes.ToString()); // todo: lijst maken van [time] waarop succes is behaald, volledige lijst voor 1 spawn-frequentie.
             }
             else
             {
@@ -127,21 +128,26 @@ public class SimpleNavMeshAi : MonoBehaviour
             // Run Collision Avoidance using desired velocity
             var movementVector = _avoidanceAlgorithm.AvoidCollisions(gameObject, _agent.desiredVelocity);
             var m = movementVector;
-            //// While on navmesh prefer to push to the right
-            //if (_agent.isOnNavMesh && _agent.FindClosestEdge(out var h))
-            //{
-            //    // Check if closest edge is on right side of agent, based on angle
-            //    var onRight = 0 < Vector3.SignedAngle(movementVector, h.position - transform.position, Vector3.up);
-            //    var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
-            //    movementVector = Quaternion.AngleAxis(angle, Vector3.up) * movementVector;
-            //}
+            // While on navmesh prefer to push to the right
+            if (_agent.isOnNavMesh && _agent.FindClosestEdge(out var h))
+            {
+                // Check if closest edge is on right side of agent, based on angle
+                var onRight = 0 < Vector3.SignedAngle(movementVector, h.position - transform.position, Vector3.up);
+                var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
+                movementVector = Quaternion.AngleAxis(5f, Vector3.up) * movementVector;
+            }
 
-            // Move based on movement vector and CA
-            // Rotate Cyclist roughly to face next move's position
+            //Move based on movement vector and CA
+            //Rotate Cyclist roughly to face next move's position
 
             Vector3 direction = _agent.velocity.normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime*2f); //can change 2f to 1f or something else
+
+            Vector3 lR = new Vector3(direction.x, 0, direction.z);
+            if (lR != Vector3.zero)
+            {
+                Quaternion lookRotation = Quaternion.LookRotation(lR);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f); //can change 2f to 1f or something else
+            }
 
 
             _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*2f); // _agent.Move(movementVector * (Time.deltaTime*.1f)); //can change 2f to 1f or something else

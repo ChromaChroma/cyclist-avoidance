@@ -80,7 +80,7 @@ namespace CollisionAvoidance
                     if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
 
                     var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
-                    if ((distance < BrakeRangeRadius) && willCollide(currentCyclist, c))
+                    if (((distance < BrakeRangeRadius) && willCollide(currentCyclist, c)))
                     {
                         // Braking logic
                         brakeVectors.Add(-preferredVelocity * brakingForce(distance, angleToOther));
@@ -145,8 +145,9 @@ namespace CollisionAvoidance
         private bool willCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
         {
             float dist = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position);
-            float futureDistCur = Vector3.Distance(currentCyclist.transform.position + currentCyclist.GetComponent<NavMeshAgent>().velocity.normalized, otherCyclist.transform.position);
-            float futureDistOth = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized);
+            float futureDistCur = Vector3.Distance(currentCyclist.transform.position + currentCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f, otherCyclist.transform.position);
+            float futureDistOth = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f);
+            if (dist < .1) return true;
             if ((futureDistCur < dist) && (futureDistOth < dist)) return true; else return false;
         }
 
@@ -167,18 +168,18 @@ namespace CollisionAvoidance
             {
                 if (angleToOther < 0)
                 {
-                    return 1f;
+                    return 1.5f;
                 }
                 else
                 {
-                    return 2f;
+                    return 3f;
                 } //in case of problems, put back to 1
             }
             else
             {
                 if (angleToOther < 0)
                 {
-                    return .5f;
+                    return .7f;
                 }
                 else
                 {
