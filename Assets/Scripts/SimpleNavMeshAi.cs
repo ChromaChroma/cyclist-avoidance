@@ -76,8 +76,6 @@ public class SimpleNavMeshAi : MonoBehaviour
 
             var bounds = goal.GetComponent<MeshRenderer>().bounds;
             _goalLocationOffset = Math.Min(bounds.size.x, bounds.size.z);
-            // _agent.updatePosition = false;
-            _agent.autoBraking = false; //Simulation does not really require single goal agents to stop slowly.
         }
     }
 
@@ -149,7 +147,7 @@ public class SimpleNavMeshAi : MonoBehaviour
                 // Check if closest edge is on right side of agent, based on angle
                 var onRight = 0 < Vector3.SignedAngle(movementVector, h.position - transform.position, Vector3.up);
                 var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
-                movementVector = Quaternion.AngleAxis(5f, Vector3.up) * movementVector;
+                // movementVector = Quaternion.AngleAxis(5f, Vector3.up) * movementVector;
             }
 
             //Move based on movement vector and CA
@@ -160,14 +158,14 @@ public class SimpleNavMeshAi : MonoBehaviour
             Vector3 lR = new Vector3(direction.x, 0, direction.z);
             if (lR != Vector3.zero)
             {
-                Quaternion lookRotation = Quaternion.LookRotation(lR);
-                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f); //can change 2f to 1f or something else
+                Quaternion lookRotation = Quaternion.LookRotation(lR); 
+                //can change 2f to 1f or something else
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f); 
+               
             }
-
-
-            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*2f); // _agent.Move(movementVector * (Time.deltaTime*.1f)); //can change 2f to 1f or something else
-
-
+            //can change 2f to 1f or something else
+            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*4f); 
+            // _agent.Move(movementVector * (Time.deltaTime*.1f)); 
         }
         
         if (ShowRadii)
