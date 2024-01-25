@@ -80,7 +80,7 @@ namespace CollisionAvoidance
                     if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
 
                     var (isCollisionImminent, tCol) = ApproximateCollision(currentCyclist, c);
-                    if (distance < BrakeRangeRadius)
+                    if ((distance < BrakeRangeRadius) && willCollide(currentCyclist, c))
                     {
                         // Braking logic
                         if (angleToOther < 0) //And is not traveling same direction (within angle)
@@ -104,7 +104,8 @@ namespace CollisionAvoidance
             var length = brakeVectors.Count;
             if (length != 0)
             {
-                var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
+                var accumulativeVector = largestVec(brakeVectors); //for braking, the closest other cyclist counts
+                //var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
                 //Debug.Log($"Acc Brake: {accumulativeVector}, pref:{preferredVelocity}, comb ={preferredVelocity + accumulativeVector}");
                 preferredVelocity += accumulativeVector;
             }
@@ -148,5 +149,22 @@ namespace CollisionAvoidance
                 : (true, t);
         }
 
+        private bool willCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
+        {
+            float dist = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position);
+            float futureDist = Vector3.Distance(currentCyclist.transform.position, otherCyclist.transform.position + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized);
+
+            if (futureDist < dist) return true; else return false;
+        }
+
+        private Vector3 largestVec(List<Vector3> l)
+        {
+            Vector3 res = Vector3.zero;
+            foreach (Vector3 v in l)
+            {
+                if (v.magnitude > res.magnitude) res = v;
+            }
+            return res;
+        }
     }
 }
