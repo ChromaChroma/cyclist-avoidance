@@ -22,8 +22,13 @@ namespace CollisionAvoidance
         private float _maxRadius;
         private readonly NavMeshAgent _agent;
 
+        // Collision checking
         public bool collides = false;
         private List<GameObject> colCyclists = new List<GameObject>();
+
+        // Grouping behaviour
+        public GameObject leader = null;
+        public bool hasleader() { leader != null; }
 
         public CollisionAvoidanceAlgorithm(NavMeshAgent agent)
         {
@@ -95,12 +100,22 @@ namespace CollisionAvoidance
                 var willCollide = WillCollide(currentCyclist, c);
                 if (distance < BrakeRangeRadius && willCollide)
                 {   // Braking logic
-
                     brakeVectors.Add(-preferredVelocity * BrakingForce(distance, angleToOther));
                 }
                 
                 if (willCollide && distance < SteerRangeRadius)
                 {   // Do steer logic
+                }
+
+                // Add cyclist ahead to leader
+                if ((distance < BrakeRangeRadius) && (AngleBetweenVelocities(c) < 5))
+                {
+                    leader = c;
+                }
+                // And remove if distance is too far again
+                if ((c == leader) && (distance > BrakeRangeRadius))
+                {
+                    leader = null;
                 }
             }
 
@@ -122,7 +137,12 @@ namespace CollisionAvoidance
             var deltaPos = other.transform.position - currentCyclist.transform.position;
             return Vector3.SignedAngle(_agent.velocity, deltaPos, Vector3.up);
         }
-        
+
+        private float AngleBetweenVelocities(GameObject other)
+        {
+            return Vector3.Angle(_agent.velocity, other.transform.velocity, Vector3.up);
+        }
+
         private bool WillCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
         {
             var cPos = currentCyclist.transform.position;
@@ -132,7 +152,7 @@ namespace CollisionAvoidance
             float futureDistCur = Vector3.Distance(cPos + _agent.velocity.normalized * .1f, oPos);
             float futureDistOth = Vector3.Distance(cPos, oPos + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f);
 
-            return dist < 0.1f || (futureDistCur < dist && futureDistOth < dist);
+            return dist < 0.5f || (futureDistCur < dist && futureDistOth < dist);
         }
         
         // Based on comfort zone paper, 3.2 page 4, "lateral clearance from the model was 0.6-0.9 m"
