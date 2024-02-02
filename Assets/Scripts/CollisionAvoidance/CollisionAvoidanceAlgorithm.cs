@@ -27,8 +27,7 @@ namespace CollisionAvoidance
         private List<GameObject> colCyclists = new List<GameObject>();
 
         // Grouping behaviour
-        public GameObject leader = null;
-        public bool hasleader() { leader != null; }
+        public GameObject follower = null;
 
         public CollisionAvoidanceAlgorithm(NavMeshAgent agent)
         {
@@ -71,7 +70,7 @@ namespace CollisionAvoidance
             var brakeVectors = new List<Vector3>();
 
             // Find all cyclists within radius max (brake, steering)
-            foreach (var c in _cyclists)
+            foreach (GameObject c in _cyclists)
             {
                 if (c == currentCyclist) continue;
 
@@ -95,28 +94,40 @@ namespace CollisionAvoidance
                 // Check if agent is in FOV
                 var angleToOther = RelativeAngleToCyclist(currentCyclist, c); //Relative angle [-180,180]
 
-                if (angleToOther is > maxFOVAngle or < -maxFOVAngle) continue; // Ignore, outside of FOV
+                if (angleToOther is > maxFOVAngle or < -maxFOVAngle)
+                {
+                    // Add cyclist behind to follower
+                    if ((distance < 2) && (AngleBetweenVelocities(c) < 5))
+                    {
+                        follower = c;
+                        Cyclists.leaderList.Add(currentCyclist);
+                    }
+                    // And remove if distance is too far again
+                    if ((c == follower) && (distance > BrakeRangeRadius))
+                    {
+                        follower = null;
+                        Cyclists.leaderList.Remove(currentCyclist);
+                    }
+                    continue; // Ignore, outside of FOV
+                }
                 
                 var willCollide = WillCollide(currentCyclist, c);
                 if (distance < BrakeRangeRadius && willCollide)
                 {   // Braking logic
-                    brakeVectors.Add(-preferredVelocity * BrakingForce(distance, angleToOther));
+                    brakeVectors.Add(-preferredVelocity * 1 * BrakingForce(distance, angleToOther, c));
                 }
-                
+
+                if ((distance < SteerRangeRadius) && (AngleBetweenVelocities(c) < 5)) //know for sure it's a leader, otherwise continue would have been called already
+                {
+                    // Take parallel component of leader's velocity, subtract it from own velocity
+                    brakeVectors.Add(preferredVelocity - Vector3.Dot(preferredVelocity, c.GetComponent<NavMeshAgent>().velocity) * preferredVelocity / (preferredVelocity.magnitude * preferredVelocity.magnitude));
+                }
+
+
                 if (willCollide && distance < SteerRangeRadius)
                 {   // Do steer logic
                 }
 
-                // Add cyclist ahead to leader
-                if ((distance < BrakeRangeRadius) && (AngleBetweenVelocities(c) < 5))
-                {
-                    leader = c;
-                }
-                // And remove if distance is too far again
-                if ((c == leader) && (distance > BrakeRangeRadius))
-                {
-                    leader = null;
-                }
             }
 
             // Apply brake vector to velocity vector
@@ -140,7 +151,7 @@ namespace CollisionAvoidance
 
         private float AngleBetweenVelocities(GameObject other)
         {
-            return Vector3.Angle(_agent.velocity, other.transform.velocity, Vector3.up);
+            return Vector3.Angle(_agent.velocity, other.GetComponent<NavMeshAgent>().velocity);
         }
 
         private bool WillCollide(GameObject currentCyclist, GameObject otherCyclist) //rudimentary approach
@@ -152,30 +163,50 @@ namespace CollisionAvoidance
             float futureDistCur = Vector3.Distance(cPos + _agent.velocity.normalized * .1f, oPos);
             float futureDistOth = Vector3.Distance(cPos, oPos + otherCyclist.GetComponent<NavMeshAgent>().velocity.normalized * .1f);
 
-            return dist < 0.5f || (futureDistCur < dist && futureDistOth < dist);
+            return dist < 1f || (futureDistCur < dist && futureDistOth < dist);
         }
         
         // Based on comfort zone paper, 3.2 page 4, "lateral clearance from the model was 0.6-0.9 m"
         // We take the average value, 0.75m as our constant
         private const float BrakeComfortClearance = 0.75f;
-        private float BrakingForce(float distance, float angleToOther) => distance switch
+        private float BrakingForce(float distance, float angleToOther, GameObject c) => Cyclists.leaderList.Contains(c) switch
         {
-            // Close range 'reactive' behaviour
-            <= BrakeComfortClearance when angleToOther < -80 => -0.1f,
-            <= BrakeComfortClearance when angleToOther < -45 => -0.2f,
-            <= BrakeComfortClearance when angleToOther <  80 =>  0.99f,
-            <= BrakeComfortClearance when angleToOther >= 80 => -0.2f,
-            
-            // Predictive range behaviour
-            > BrakeComfortClearance  when angleToOther < -45 => -0.1f,
-            > BrakeComfortClearance  when angleToOther < -20 => -0.05f,
-            > BrakeComfortClearance  when angleToOther <  0  =>  0f,
-            > BrakeComfortClearance  when angleToOther <  25 =>  0.4f,
-            > BrakeComfortClearance  when angleToOther <  70 =>  0.95f,
-            > BrakeComfortClearance  when angleToOther >  0  =>  0f,
-            _ => throw new ArgumentOutOfRangeException(nameof(distance), distance, "BrakingForce value was not covered in patterns")
+            true => distance switch
+            {
+                // Close range 'reactive' behaviour
+                <= BrakeComfortClearance when angleToOther < -80 => 0.1f,
+                <= BrakeComfortClearance when angleToOther < -45 => 0.2f,
+                <= BrakeComfortClearance when angleToOther < -20 => 0.4f,
+                <= BrakeComfortClearance when angleToOther < 80 => 0.99f,
+                <= BrakeComfortClearance when angleToOther >= 80 => 0.2f,
+
+                // Predictive range behaviour
+                > BrakeComfortClearance when angleToOther < -50 => -0.1f,
+                > BrakeComfortClearance when angleToOther < -20 => 0.4f,
+                > BrakeComfortClearance when angleToOther < 0 => 0.4f,
+                > BrakeComfortClearance when angleToOther < 25 => 0.4f,
+                > BrakeComfortClearance when angleToOther < 70 => 0.95f,
+                > BrakeComfortClearance when angleToOther > 0 => -0.1f,
+                _ => throw new ArgumentOutOfRangeException(nameof(distance), distance, "BrakingForce value was not covered in patterns")
+            },
+            false => distance switch
+            {
+                // Close range 'reactive' behaviour
+                <= BrakeComfortClearance when angleToOther < -80 => -0.1f,
+                <= BrakeComfortClearance when angleToOther < -45 => -0.2f,
+                <= BrakeComfortClearance when angleToOther < 80 => 0.99f,
+                <= BrakeComfortClearance when angleToOther >= 80 => -0.2f,
+
+                // Predictive range behaviour
+                > BrakeComfortClearance when angleToOther < -45 => -0.1f,
+                > BrakeComfortClearance when angleToOther < -20 => -0.05f,
+                > BrakeComfortClearance when angleToOther < 0 => 0f,
+                > BrakeComfortClearance when angleToOther < 25 => 0.4f,
+                > BrakeComfortClearance when angleToOther < 70 => 0.95f,
+                > BrakeComfortClearance when angleToOther > 0 => 0f,
+                _ => throw new ArgumentOutOfRangeException(nameof(distance), distance, "BrakingForce value was not covered in patterns")
+            },
         };
-        
         // TODO: verder werken aan metric: nu heb ik alleen aantal fietsers dat aankomt gegeven een bepaalde tijd, kan time signature meegeven met het tellen om de flow per (x aantal seconden) in kaart te brengen
     }
 }
