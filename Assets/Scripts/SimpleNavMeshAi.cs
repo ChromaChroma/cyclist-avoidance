@@ -115,7 +115,7 @@ public class SimpleNavMeshAi : MonoBehaviour
                 Cyclists.successtimes.Add(Time.time);
                 Cyclists.collisiontimes.Add(timeCollided);
 
-                StreamWriter sw = new StreamWriter("C:\\CrowdSim\\succColl.txt", append: true);
+                StreamWriter sw = new StreamWriter(@"C:\CrowdSim\succColl.txt", append: true);
                 sw.WriteLine($"{Time.time} {timeCollided}");
                 sw.Close();
 
@@ -131,41 +131,27 @@ public class SimpleNavMeshAi : MonoBehaviour
         }
         else
         {
-            // Run Collision Avoidance using desired velocity
-            var movementVector = _avoidanceAlgorithm.AvoidCollisions(gameObject, _agent.desiredVelocity);
-            bool collides = _avoidanceAlgorithm.collides;
-
-            if (collides)
+            if (_avoidanceAlgorithm.Collides)
             {
                 timeCollided += Time.deltaTime;
             }
-
-            var m = movementVector;
-            // While on navmesh prefer to push to the right
-            if (_agent.isOnNavMesh && _agent.FindClosestEdge(out var h))
-            {
-                // Check if closest edge is on right side of agent, based on angle
-                var onRight = 0 < Vector3.SignedAngle(movementVector, h.position - transform.position, Vector3.up);
-                var angle = onRight ? 30f : Math.Min(30f, 90f * h.distance);
-                // movementVector = Quaternion.AngleAxis(5f, Vector3.up) * movementVector;
-            }
-
-            //Move based on movement vector and CA
+           
+            
             //Rotate Cyclist roughly to face next move's position
-
             Vector3 direction = _agent.velocity.normalized;
-
-            Vector3 lR = new Vector3(direction.x, 0, direction.z);
-            if (lR != Vector3.zero)
+            Vector3 lookDir = new Vector3(direction.x, 0, direction.z);
+            if (lookDir != Vector3.zero)
             {
-                Quaternion lookRotation = Quaternion.LookRotation(lR); 
-                //can change 2f to 1f or something else
+                Quaternion lookRotation = Quaternion.LookRotation(lookDir); 
+                // Can change 2f to 1f or something else
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f); 
-               
             }
-            //can change 2f to 1f or something else
+             
+            // Run Collision Avoidance using desired velocity
+            var movementVector = _avoidanceAlgorithm.AvoidCollisions(gameObject, _agent.desiredVelocity);
+            
+            // Can change 2f to 1f or something else
             _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*4f); 
-            // _agent.Move(movementVector * (Time.deltaTime*.1f)); 
         }
         
         if (ShowRadii)

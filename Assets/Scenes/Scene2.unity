@@ -557,6 +557,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: abcb5c077146eeb438401226766c2fe4, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: abcb5c077146eeb438401226766c2fe4, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -2488,7 +2492,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.13333334
+  m_VoxelSize: 0.1
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: 8d6f890534db17b4a8c088582adb3185, type: 2}
   m_BuildHeightMesh: 0
@@ -2718,7 +2722,7 @@ Transform:
   m_GameObject: {fileID: 812446645}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1, y: 0.64, z: -13.64}
+  m_LocalPosition: {x: 1, y: 0.64, z: -8.46}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
