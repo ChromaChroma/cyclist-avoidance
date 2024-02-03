@@ -1,8 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.Serialization;
 
 public class BicycleSpawner : MonoBehaviour
 {
@@ -17,6 +14,8 @@ public class BicycleSpawner : MonoBehaviour
 
     private float _time;
 
+    public bool radiiActive;
+
     void Update()
     {
         _time += Time.deltaTime;
@@ -29,9 +28,11 @@ public class BicycleSpawner : MonoBehaviour
             spawnedCyclist.transform.position = transform.position;
             
             var cyclistAi = spawnedCyclist.GetComponent<SimpleNavMeshAi>();
+            cyclistAi.ShowRadii = radiiActive;
             cyclistAi.goal = goalObject.transform;
 
             // Add cyclist to collective list of agents (for collision checks and nearest neighbours)
+            Cyclists.cyclistList.Add(spawnedCyclist);
 
         }
     }

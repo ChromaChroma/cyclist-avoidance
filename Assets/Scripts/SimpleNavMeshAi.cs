@@ -2,26 +2,59 @@ using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.AI.Navigation;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.IO;
+using CollisionAvoidance;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 public class SimpleNavMeshAi : MonoBehaviour
 {
     public Transform goal;
+    private float _goalLocationOffset;
 
     private NavMeshAgent _agent;
-    private float _goalLocationOffset;
+
     private List<Vector3> _destinations = new List<Vector3>();
+
+    public float timeCollided = 0;
+
+    // CA
+    private CollisionAvoidanceAlgorithm _avoidanceAlgorithm;
+
+    // Show Radii fields
+    private bool _showRadii;
+
+    public bool ShowRadii
+    {
+        get => _showRadii;
+        set
+        {
+            breakCircleRenderer.enabled = value;
+            steerCircleRenderer.enabled = value;
+            _showRadii = value;
+        }
+    }
+
+    [SerializeField] private LineRenderer breakCircleRenderer;
+    [SerializeField] private LineRenderer steerCircleRenderer;
 
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _avoidanceAlgorithm = new CollisionAvoidanceAlgorithm(_agent)
+        {
+            AutoUpdateRadii = true
+        };
     }
 
     private void Start()
     {
-        if (goal is not null) // Not sure this always runs After adding goal when Instantiating
+        if (goal is not null)
         {
             var distZroad = Math.Abs(_agent.transform.position.x - 0.29); //distance from Z-road
             var distXroad = Math.Abs(_agent.transform.position.z - 1.25); //distance from X-road
@@ -38,24 +71,93 @@ public class SimpleNavMeshAi : MonoBehaviour
             _destinations.Add(goal.transform.position);
 
 
-            //_agent.agentTypeID = 1;
             _agent.radius = 0.5f;
             _agent.destination = _destinations[0];
+
             var bounds = goal.GetComponent<MeshRenderer>().bounds;
-            _goalLocationOffset = Math.Min(bounds.size.x,bounds.size.z);
+            _goalLocationOffset = Math.Min(bounds.size.x, bounds.size.z);
+        }
+    }
+
+    private const int Steps = 100;
+
+    private void DrawCircle(LineRenderer lineRenderer, float radius)
+    {
+        var pos = gameObject.transform.position;
+        lineRenderer.positionCount = Steps;
+
+        for (int currentStep = 0; currentStep < Steps; currentStep++)
+        {
+            var circumferenceProgress = (float)currentStep / Steps;
+
+            var currentRadian = circumferenceProgress * 2 * Math.PI;
+
+            var xScaled = Mathf.Cos((float)currentRadian);
+            var zScaled = (float)Math.Sin(currentRadian);
+
+            var x = xScaled * radius + pos.x;
+            var z = zScaled * radius + pos.z;
+
+            Vector3 currentPos = new Vector3(x, 2, z);
+            lineRenderer.SetPosition(currentStep, currentPos);
         }
     }
 
     private void Update()
     {
-        if (Vector3.Distance(_agent.destination, _agent.transform.position) < _goalLocationOffset )
+        var curPos = transform.position;
+        if (Vector3.Distance(_agent.destination, curPos) <= _goalLocationOffset)
         {
-            if (_destinations.Count == 1) Destroy(gameObject);
+            if (_destinations.Count == 1)
+            {
+                Cyclists.cyclistList.Remove(gameObject);
+                Destroy(gameObject);
+                Cyclists.successtimes.Add(Time.time);
+                Cyclists.collisiontimes.Add(timeCollided);
+
+                StreamWriter sw = new StreamWriter(@"C:\CrowdSim\succColl.txt", append: true);
+                sw.WriteLine($"{Time.time} {timeCollided}");
+                sw.Close();
+
+                Debug.Log(Time.time);
+                Debug.Log(timeCollided);
+            }
             else
             {
                 _destinations.RemoveAt(0);
-                _agent.SetDestination(_destinations[0]);
+                _agent.SetDestination(_destinations[0]); //put the next destination in
             }
+            
+        }
+        else
+        {
+            if (_avoidanceAlgorithm.Collides)
+            {
+                timeCollided += Time.deltaTime;
+            }
+           
+            
+            //Rotate Cyclist roughly to face next move's position
+            Vector3 direction = _agent.velocity.normalized;
+            Vector3 lookDir = new Vector3(direction.x, 0, direction.z);
+            if (lookDir != Vector3.zero)
+            {
+                Quaternion lookRotation = Quaternion.LookRotation(lookDir); 
+                // Can change 2f to 1f or something else
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f); 
+            }
+             
+            // Run Collision Avoidance using desired velocity
+            var movementVector = _avoidanceAlgorithm.AvoidCollisions(gameObject, _agent.desiredVelocity);
+            
+            // Can change 2f to 1f or something else
+            _agent.velocity = Vector3.Slerp(_agent.velocity,movementVector, Time.deltaTime*4f); 
+        }
+        
+        if (ShowRadii)
+        {
+            DrawCircle(breakCircleRenderer, _avoidanceAlgorithm.BrakeRangeRadius);
+            DrawCircle(steerCircleRenderer, _avoidanceAlgorithm.SteerRangeRadius);
         }
     }
 }

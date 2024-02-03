@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -7,11 +8,15 @@ public class ToolDropdownScript : MonoBehaviour
 {
     private TMP_Dropdown _dropdown;
     [SerializeField] [CanBeNull] private GameObject _obstaclesView;
+    private SpawnOnClick3D _spawnComponent;
 
     private void Awake()
     {
         _dropdown = GetComponent<TMP_Dropdown>();
         _dropdown.onValueChanged.AddListener(UpdateToolMode);
+        _spawnComponent = GetComponent<SpawnOnClick3D>();
+        _spawnComponent._requiredToolMode = ToolMode.Spawner;
+        
         LoadItems();
     }
 
@@ -26,8 +31,8 @@ public class ToolDropdownScript : MonoBehaviour
             {
                 case ToolMode.None:
                 case ToolMode.Spawner:
-                case ToolMode.Select:
                     _obstaclesView?.SetActive(false);
+                    
                     break;
                 case ToolMode.Obstacles:
                     _obstaclesView?.SetActive(true);
