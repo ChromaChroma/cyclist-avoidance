@@ -115,9 +115,9 @@ public class SimpleNavMeshAi : MonoBehaviour
                 Cyclists.successtimes.Add(Time.time);
                 Cyclists.collisiontimes.Add(timeCollided);
 
-                // StreamWriter sw = new StreamWriter(@"C:\CrowdSim\succColl.txt", append: true);
-                // sw.WriteLine($"{Time.time} {timeCollided}");
-                // sw.Close();
+                StreamWriter sw = new StreamWriter(@"C:\CrowdSim\succColl.txt", append: true);
+                sw.WriteLine($"{Time.time} {timeCollided}");
+                sw.Close();
 
                 Debug.Log(Time.time);
                 Debug.Log(timeCollided);
