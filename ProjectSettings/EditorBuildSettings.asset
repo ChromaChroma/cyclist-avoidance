@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/TJunction.unity
     guid: 25f9fa7538380cd4a8f97549882e7de2
   - enabled: 1
+    path: Assets/Scenes/XJunction.unity
+    guid: 24f78dc00a62c5c4489005ff0f17c6e5
+  - enabled: 1
     path: Assets/Scenes/StraightRoad.unity
     guid: ba65ad61672d0f34795eef7fd49979ef
   m_configObjects: {}
