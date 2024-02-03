@@ -45,5 +45,7 @@ public class ChangeScene : MonoBehaviour
     {
         var selectedScene = _dropdown.options[_dropdown.value].text;
         SceneManager.LoadScene(sceneName: selectedScene);
+        Cyclists.cyclistList.Clear();
+        
     }
 }
