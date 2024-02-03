@@ -99,8 +99,8 @@ namespace CollisionAvoidance
 
                 if (willCollide && distance < SteerRangeRadius)
                 {
-                    // Do steer logic
-                    sf = SteerForce(angleToOther);
+                    //// Do steer logic
+                    //sf = SteerForce(angleToOther);
                 }
             }
 
