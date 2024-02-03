@@ -48,7 +48,7 @@ namespace CollisionAvoidance
             // Steer radius function
             var steerRangeCurveFunction = (float)(2 + v * 0.6f + Math.Pow(v / 13, 2));
             SteerRangeRadius = steerRangeCurveFunction;
-            
+
             // Update max Radius to largest radius
             _maxRadius = Math.Max(BrakeRangeRadius, SteerRangeRadius);
         }
@@ -61,7 +61,7 @@ namespace CollisionAvoidance
             }
 
             var brakeVectors = new List<Vector3>();
-            var sf = Vector3.zero;
+            var steeringForce = Vector3.zero;
 
             // Find all cyclists within radius max (brake, steering)
             foreach (var c in _cyclists)
@@ -100,7 +100,11 @@ namespace CollisionAvoidance
                 if (willCollide && distance < SteerRangeRadius)
                 {
                     // Do steer logic
-                    sf = SteerForce(angleToOther);
+                    var sf = Vector3.Cross(preferredVelocity, Vector3.up).normalized * SteerForce(distance, angleToOther);
+                    if (sf.magnitude > steeringForce.magnitude)
+                    {
+                        steeringForce = sf;
+                    }
                 }
             }
 
@@ -110,10 +114,10 @@ namespace CollisionAvoidance
             {
                 // var accumulativeVector = brakeVectors.Aggregate(Vector3.zero, (v, acc) => acc + v) * (1f / length);
                 var accumulativeVector = brakeVectors.OrderByDescending(v => v.magnitude).First();
-                preferredVelocity += accumulativeVector;            
-
+                preferredVelocity += accumulativeVector;
             }
-            return preferredVelocity + sf;
+
+            return preferredVelocity + steeringForce;
         }
 
         private float RelativeAngleToCyclist(GameObject currentCyclist, GameObject other)
@@ -160,19 +164,21 @@ namespace CollisionAvoidance
 
         // TODO: verder werken aan metric: nu heb ik alleen aantal fietsers dat aankomt gegeven een bepaalde tijd, kan time signature meegeven met het tellen om de flow per (x aantal seconden) in kaart te brengen
 
-        private Vector3 SteerForce(float angleToOther)
+        private float SteerForce(float distance, float angleToOther)
         {
             var sf = angleToOther switch
             {
-                < -25 => new Vector3(-1f, 0, 0), //slight to no r
-                < 45 => new Vector3(2f, 0, 0), //r
-                >= 45 => new Vector3(1f, 0, 0), // no or left to avoid colliding
-                _ => Vector3.zero
+                < -35 => -1f, //slight to no r
+                < -10 => -2f, //r
+                < 10 => -5f, //r
+                < 45 => -2f, //r
+                >= 45 => -1f, // no or left to avoid colliding
+                _ => 0
             };
 
-            return Vector3.Slerp(Vector3.zero, sf, Time.deltaTime * 25f);
+            return sf; //Vector3.Slerp(Vector3.zero, sf, Time.deltaTime * 25f);
         }
-        
+
         // Roughly calculates if and when two agents would collide
         private (bool, float) ApproximateCollision(GameObject cur, GameObject other)
         {
@@ -208,7 +214,8 @@ namespace CollisionAvoidance
             var r0DeltaP2 = Math.Pow(r0Delta, 2);
             var combinedP2 = Math.Pow(vrDelta, 2);
 
-            var t2 = Convert.ToSingle((-vrDelta - Math.Sqrt(combinedP2 - vDeltaP2 * (r0DeltaP2 - rP2))) / vDeltaP2) +  0.5f;
+            var t2 = Convert.ToSingle((-vrDelta - Math.Sqrt(combinedP2 - vDeltaP2 * (r0DeltaP2 - rP2))) / vDeltaP2) +
+                     0.5f;
 
             return t2 is float.NaN or < 0
                 ? (false, -1) // t < 0 is not collision after NOW, return false
