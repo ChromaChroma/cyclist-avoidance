@@ -17,6 +17,7 @@ public class ObstacleDropDownScript : MonoBehaviour
         _dropdown = GetComponent<TMP_Dropdown>();
         _navMeshSurface = FindObjectOfType<NavMeshSurface>();
         _spawnComponent = GetComponent<SpawnOnClick3D>();
+        _spawnComponent._requiredToolMode = ToolMode.Obstacles;
             
         _spawnComponent._onSpawnClick = () =>_navMeshSurface.UpdateNavMesh(_navMeshSurface.navMeshData);
         _spawnComponent._onDespawnClick = () =>_navMeshSurface.UpdateNavMesh(_navMeshSurface.navMeshData);

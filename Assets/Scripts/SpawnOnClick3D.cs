@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 public class SpawnOnClick3D : MonoBehaviour
 {
     [SerializeField] public GameObject _gameObject;
-    [SerializeField] private ToolMode _requiredToolMode = ToolMode.Spawner;
+    [SerializeField] public ToolMode _requiredToolMode = ToolMode.Spawner;
     [SerializeField] [CanBeNull] public Action _onSpawnClick;
     [SerializeField] [CanBeNull] public Action _onDespawnClick;
     

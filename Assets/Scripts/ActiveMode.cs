@@ -12,6 +12,5 @@ public enum ToolMode
 {
     None,
     Spawner,
-    Select,
     Obstacles
 }
